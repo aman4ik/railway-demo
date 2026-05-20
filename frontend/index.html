@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Lab CD</title>
+</head>
+<body>
+    <h1>Студент: Аман | ID: 12345</h1>
+    
+    <div>
+        <input type="text" id="itemName" placeholder="Новая запись">
+        <button onclick="addItem()">Добавить</button>
+    </div>
+    
+    <ul id="list"></ul>
+
+    <script>
+        // Railway подставит URL сюда при билде
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+        async function loadData() {
+            const res = await fetch(`${API_URL}/api/data`);
+            const data = await res.json();
+            const list = document.getElementById('list');
+            list.innerHTML = '';
+            data.forEach(item => {
+                list.innerHTML += `<li>${item.name} <button onclick="deleteItem(${item.id})">Удалить</button></li>`;
+            });
+        }
+
+        async function addItem() {
+            const name = document.getElementById('itemName').value;
+            await fetch(`${API_URL}/api/data`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name })
+            });
+            document.getElementById('itemName').value = '';
+            loadData();
+        }
+
+        async function deleteItem(id) {
+            await fetch(`${API_URL}/api/data/${id}`, { method: 'DELETE' });
+            loadData();
+        }
+
+        loadData();
+    </script>
+</body>
+</html>
